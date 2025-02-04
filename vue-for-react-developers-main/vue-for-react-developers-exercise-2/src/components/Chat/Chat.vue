@@ -13,6 +13,20 @@ const USER_ID = 1111;
 // Create a reactive variable from existing messages. Similar to useState.
 const messages = ref(existingMessages);
 
+/**
+ * Adds a message to the chat
+ * @param {String} content Message content
+ */
+function addMessage(content, type) {
+  const message = {
+    content,
+    type, // Hint: you may want to parameterize this
+    senderId: USER_ID,
+    timestamp: new Date(),
+  };
+  messages.value = [...messages.value, message];
+}
+
 // Use a behavior that automatically scrolls the message list to the bottom whenever its content changes.
 const messageListElement = ref(null); // Create a ref that we attach to a DOM element. Similar to useRef.
 useAutoScrollToBottom(messageListElement); // Using a "hook".
@@ -33,12 +47,7 @@ provide("userId", USER_ID);
         />
       </div>
 
-      <!-- Hint: Create a function that adds new messages to 'messages'.
-                 Make the <Compose /> component call this function whenever a 'send' event is emitted.
-
-           Tip:  In your function, you can replace 'messages.value' directly ie. 'messages.value = [...messages.value, newMessage]'
-      -->           
-      <Compose />
+      <Compose @send="addMessage" />
     </div>
   </CenterOnPage>
 </template>
