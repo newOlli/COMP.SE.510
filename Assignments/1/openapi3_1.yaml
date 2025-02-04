@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: Sensor network API
+  description: API for managing sensors and buildings and things like that.
+  contact:
+    name: Olli Lehmuskenttä
+    email: olli.lehmuskentta@tuni.fi
+  version: 1.0.0
+
+tags:
+  - name: Building
+    description: building operations
+  - name: Sensor
+    description: sensor operations
+
+paths:
+  /buildings:
+    get:
+      summary: Get all buildings
+      tags:
+        - Building
+      responses:
+        '200':
+          description: A list of buildings
+        '500':
+          description: Error getting buildings
+    post:
+      summary: Add a new building
+      tags:
+        - Building
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Building'
+      responses:
+        '201':
+          description: Building created
+        '500':
+          description: Error creating building
+
+  /buildings/{buildingId}:
+    get:
+      summary: Get a building by ID
+      tags:
+        - Building
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Building details
+        '500':
+          description: Error getting buildings
+    put:
+      summary: Update a building
+      tags:
+        - Building
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Building'
+      responses:
+        '200':
+          description: Building updated
+        '500':
+          description: Error uppdating building
+
+  /buildings/{buildingId}/sensors:
+    get:
+      summary: Get all sensors in a building
+      tags:
+        - Sensor
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of sensors in the building
+        '500':
+          description: Error getting sensors
+
+  /sensors:
+    get:
+      summary: Get sensors by state
+      tags:
+        - Sensor
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [online, offline, error]
+      responses:
+        '200':
+          description: List of sensors in the specified state
+        '500':
+          description: Error getting list of sensors
+
+  /sensors/{sensorId}:
+    put:
+      summary: Add or replace a sensor
+      tags:
+        - Sensor
+      parameters:
+        - name: sensorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sensor'
+      responses:
+        '200':
+          description: Sensor replaced or added
+        '500':
+          description: Error replacing or adding a sensor
+    delete:
+      summary: Delete a sensor
+      tags:
+        - Sensor
+      parameters:
+        - name: sensorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Sensor deleted
+        '500':
+          description: Error deleting sensor
+
+  /sensors/{sensorId}/state:
+    put:
+      summary: Update the state of a sensor
+      tags:
+        - Sensor
+      parameters:
+        - name: sensorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state:
+                  type: string
+                  enum: [online, offline, error]
+      responses:
+        '200':
+          description: Sensor state updated
+        '500':
+          description: Failed to update sensor state
+
+components:
+  schemas:
+    Building:
+      type: object
+      required:
+        - id
+        - name
+        - address
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            post_number:
+              type: integer
+    Sensor:
+      type: object
+      required:
+        - id
+        - name
+        - value
+        - state
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        value:
+          type: number
+        state:
+          type: string
+          enum: [online, offline, error]
